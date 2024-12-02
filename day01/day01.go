@@ -1,4 +1,4 @@
-package solutions
+package day01
 
 import (
 	"advent_of_code_2024/utils"
