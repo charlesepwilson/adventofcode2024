@@ -17,8 +17,8 @@ func getLeftRightLists() ([]int, []int) {
 
 	for line := range lines {
 		parts := bytes.Fields(lines[line])
-		leftNum, _ := strconv.ParseInt(string(parts[0]), 10, 0)
-		rightNum, _ := strconv.ParseInt(string(parts[1]), 10, 0)
+		leftNum, _ := strconv.Atoi(string(parts[0]))
+		rightNum, _ := strconv.Atoi(string(parts[1]))
 
 		leftList = append(leftList, int(leftNum))
 		rightList = append(rightList, int(rightNum))
