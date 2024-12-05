@@ -5,6 +5,7 @@ import (
 	"advent_of_code_2024/day02"
 	"advent_of_code_2024/day03"
 	"advent_of_code_2024/day04"
+	"advent_of_code_2024/day05"
 	"fmt"
 )
 
@@ -17,5 +18,6 @@ func main() {
 	fmt.Println("day", day03.DAY, "part", 2, day03.Part2())
 	fmt.Println("day", day04.DAY, "part", 1, day04.Part1())
 	fmt.Println("day", day04.DAY, "part", 2, day04.Part2())
-
+	fmt.Println("day", day05.DAY, "part", 1, day05.Part1())
+	fmt.Println("day", day05.DAY, "part", 2, day05.Part2())
 }
