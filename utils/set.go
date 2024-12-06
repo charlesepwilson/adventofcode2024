@@ -1,6 +1,10 @@
 package utils
 
-import "go/types"
+import (
+	"go/types"
+	"iter"
+	"maps"
+)
 
 type Set[T comparable] struct {
 	_map map[T]types.Nil
@@ -22,4 +26,8 @@ func (s Set[T]) Len() int {
 
 func NewSet[T comparable]() Set[T] {
 	return Set[T]{_map: make(map[T]types.Nil)}
+}
+
+func (s Set[T]) Iterate() iter.Seq[T] {
+	return maps.Keys(s._map)
 }
