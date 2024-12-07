@@ -54,8 +54,7 @@ func parseInput(input []byte) (start VectorI, obstacles []VectorI, gridSize Vect
 	return start, obstacles, gridSize
 }
 
-func part1(input []byte) int {
-	position, obstacles, gridSize := parseInput(input)
+func getPathPositions(position VectorI, obstacles []VectorI, gridSize VectorI) utils.Set[VectorI] {
 	facing := VectorI{down: -1, right: 0}
 	pathPositions := utils.NewSet[VectorI]()
 	for position.down >= 0 && position.right < gridSize.right && position.right >= 0 && position.down < gridSize.down {
@@ -67,7 +66,12 @@ func part1(input []byte) int {
 		nextPos = position.Add(facing)
 		position = nextPos
 	}
+	return pathPositions
+}
 
+func part1(input []byte) int {
+	position, obstacles, gridSize := parseInput(input)
+	pathPositions := getPathPositions(position, obstacles, gridSize)
 	return pathPositions.Len()
 }
 
@@ -99,7 +103,10 @@ func findNextPos(state State, rowObstacles [][]int, colObstacles [][]int) (nextS
 	alignedObstacles := relevantObstacles[alignment]
 	backwards := fVal < 0
 	if backwards {
-		slices.Reverse(alignedObstacles)
+		copyObstacles := make([]int, len(alignedObstacles))
+		copy(copyObstacles, alignedObstacles)
+		slices.Reverse(copyObstacles)
+		alignedObstacles = copyObstacles
 	}
 	for _, obstaclePos := range alignedObstacles {
 		diff := obstaclePos < displacement
@@ -161,28 +168,32 @@ func part2(input []byte) int {
 		rowObstacles[obstacle.down] = append(rowObstacles[obstacle.down], obstacle.right)
 		colObstacles[obstacle.right] = append(colObstacles[obstacle.right], obstacle.down)
 	}
+	for _, oblist := range rowObstacles {
+		sort.Ints(oblist)
+	}
+	for _, oblist := range colObstacles {
+		sort.Ints(oblist)
+	}
 	startState := State{startPos, facing}
 	total := 0
+	fmt.Println(obstacles)
 	fmt.Println(rowObstacles)
 	fmt.Println(colObstacles)
 	loopMakers := make([]VectorI, 0)
-	for i := range gridSize.right {
-		for j := range gridSize.down {
-			trialObstacle := VectorI{down: j, right: i}
-			if trialObstacle == startPos {
-				continue
-			}
-			trialRowObstacles := makeSliceCopy(rowObstacles)
-			trialColObstacles := makeSliceCopy(colObstacles)
-			trialRowObstacles[j] = append(trialRowObstacles[j], i)
-			sort.Ints(trialRowObstacles[j])
-			trialColObstacles[i] = append(trialColObstacles[i], j)
-			sort.Ints(trialColObstacles[i])
-			if isLoop(startState, trialRowObstacles, trialColObstacles) {
-				total += 1
-				loopMakers = append(loopMakers, trialObstacle)
-				//fmt.Println(i, j)
-			}
+	pathPositions := getPathPositions(startPos, obstacles, gridSize)
+	for trialObstacle := range pathPositions.Iterate() {
+		if trialObstacle == startPos {
+			continue
+		}
+		trialRowObstacles := makeSliceCopy(rowObstacles)
+		trialColObstacles := makeSliceCopy(colObstacles)
+		trialRowObstacles[trialObstacle.down] = append(trialRowObstacles[trialObstacle.down], trialObstacle.right)
+		sort.Ints(trialRowObstacles[trialObstacle.down])
+		trialColObstacles[trialObstacle.right] = append(trialColObstacles[trialObstacle.right], trialObstacle.down)
+		sort.Ints(trialColObstacles[trialObstacle.right])
+		if isLoop(startState, trialRowObstacles, trialColObstacles) {
+			total += 1
+			loopMakers = append(loopMakers, trialObstacle)
 		}
 	}
 	//fmt.Println(loopMakers)
