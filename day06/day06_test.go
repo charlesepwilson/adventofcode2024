@@ -1,12 +1,25 @@
 package day06
 
 import (
+	"fmt"
+	"sort"
 	"testing"
 )
 
 func getExample() []byte {
 	return []byte("....#.....\n.........#\n..........\n..#.......\n.......#..\n..........\n.#..^.....\n........#.\n#.........\n......#...")
 }
+
+// ....#.....
+// .........#
+// ..........
+// ..#.......
+// .......#..
+// ..........
+// .#..^.....
+// ........#.
+// #.........
+// ......#...
 
 func TestPart1(t *testing.T) {
 	result := part1(getExample())
@@ -39,16 +52,30 @@ func TestIsLoop(t *testing.T) {
 	) {
 		t.Errorf("IsLoop returned true without extra obstacle")
 	}
-	newObstacle := VectorI{down: 6, right: 3}
-	rowObstacles[newObstacle.down] = append(rowObstacles[newObstacle.down], newObstacle.right)
-	colObstacles[newObstacle.right] = append(rowObstacles[newObstacle.right], newObstacle.down)
 
-	if !isLoop(
-		startState,
-		rowObstacles,
-		colObstacles,
-	) {
-		t.Errorf("IsLoop returned false after adding the obstacle")
+	loopMakers := []VectorI{
+		{down: 6, right: 3},
+		{down: 7, right: 6},
+		{down: 7, right: 7},
+		{down: 8, right: 1},
+		{down: 8, right: 3},
+		{down: 9, right: 7},
+	}
+	for _, loopMaker := range loopMakers {
+		fmt.Println("trialing ", loopMaker)
+		trialRowObstacles := makeSliceCopy(rowObstacles)
+		trialColObstacles := makeSliceCopy(colObstacles)
+		trialRowObstacles[loopMaker.down] = append(trialRowObstacles[loopMaker.down], loopMaker.right)
+		sort.Ints(trialRowObstacles[loopMaker.down])
+		trialColObstacles[loopMaker.right] = append(trialColObstacles[loopMaker.right], loopMaker.down)
+		sort.Ints(trialColObstacles[loopMaker.right])
+		if !isLoop(
+			startState,
+			trialRowObstacles,
+			trialColObstacles,
+		) {
+			t.Errorf("IsLoop returned false after adding the obstacle")
+		}
 	}
 
 }

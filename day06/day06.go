@@ -14,6 +14,17 @@ type VectorI struct {
 	down, right int
 }
 
+// if we make a turn against an obstacle h0 at (r0, c0) while moving up
+// then the state s0 at the turn point is (r0+1, c0, U)
+// and there must be an obstacle h1 at (r0+1, c1), where c1 > c0
+// then the next turn state s1 is (r0+1, c1-1, R)
+// then next obstacle h2 is at (r2, c1-1), where r2 > r0+1
+// and next state s2 is (r2 + 1, c1-1, D)
+
+// we want to find a sequence of states such that for some value n, sn == s0
+// since every turn goes 90 degrees we know that the size of the loop must be a multiple of 4
+// we know that every obstacle in the loop (r, c) must have a previous obstacle that's offset by one row/column and a next obstcle also offset by one row or column
+
 func (v VectorI) turnRight() VectorI {
 	return VectorI{v.right, -v.down}
 }
@@ -115,12 +126,15 @@ func isLoop(state State, rowObstacles [][]int, colObstacles [][]int) bool {
 	path := make([]State, 0)
 	for {
 		if !state.Valid() {
+			//for _, st := range path {
+			//	fmt.Println(st)
+			//}
 			return false
 		} else if seen.Contains(state) {
-			fmt.Println("Found loop")
-			for _, st := range path {
-				fmt.Println(st)
-			}
+			//fmt.Println("Found loop")
+			//for _, st := range path {
+			//	fmt.Println(st)
+			//}
 			return true
 		}
 		seen.Add(state)
@@ -145,11 +159,13 @@ func part2(input []byte) int {
 	colObstacles := make([][]int, gridSize.right)
 	for _, obstacle := range obstacles {
 		rowObstacles[obstacle.down] = append(rowObstacles[obstacle.down], obstacle.right)
-		colObstacles[obstacle.right] = append(rowObstacles[obstacle.right], obstacle.down)
+		colObstacles[obstacle.right] = append(colObstacles[obstacle.right], obstacle.down)
 	}
 	startState := State{startPos, facing}
 	total := 0
-	fmt.Println(rowObstacles, colObstacles)
+	fmt.Println(rowObstacles)
+	fmt.Println(colObstacles)
+	loopMakers := make([]VectorI, 0)
 	for i := range gridSize.right {
 		for j := range gridSize.down {
 			trialObstacle := VectorI{down: j, right: i}
@@ -164,11 +180,12 @@ func part2(input []byte) int {
 			sort.Ints(trialColObstacles[i])
 			if isLoop(startState, trialRowObstacles, trialColObstacles) {
 				total += 1
-				fmt.Println(i, j)
+				loopMakers = append(loopMakers, trialObstacle)
+				//fmt.Println(i, j)
 			}
 		}
 	}
-
+	//fmt.Println(loopMakers)
 	return total
 }
 
