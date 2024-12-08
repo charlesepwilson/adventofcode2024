@@ -16,3 +16,11 @@ func Count[T comparable](slice []T, item T) int {
 	}
 	return count
 }
+
+func Pow(base int, exp int) int {
+	result := 1
+	for i := 0; i < exp; i++ {
+		result *= base
+	}
+	return result
+}

@@ -19,5 +19,5 @@ func main() {
 	//fmt.Println("day", day06.DAY, "part", 1, day06.Part1())
 	//fmt.Println("day", day06.DAY, "part", 2, day06.Part2()) // 556 too low
 	fmt.Println("day", day07.DAY, "part", 1, day07.Part1())
-	//fmt.Println("day", day07.DAY, "part", 2, day07.Part2())
+	fmt.Println("day", day07.DAY, "part", 2, day07.Part2())
 }
