@@ -7,7 +7,54 @@ import (
 	"strconv"
 )
 
-const DAY = 5
+type Solution struct{}
+
+func (Solution) Day() int { return 5 }
+
+func (Solution) Part1(input []byte) int {
+	rules, updates := parseInput(input)
+	total := 0
+	for _, pageNumbers := range updates {
+		if inOrder(pageNumbers, rules) {
+			total += getMiddleValue(pageNumbers)
+		}
+	}
+	return total
+}
+
+func (Solution) Part2(input []byte) int {
+	beforeRules, updates := parseInput(input)
+	total := 0
+	for _, pageNumbers := range updates {
+		if !inOrder(pageNumbers, beforeRules) {
+			slices.SortFunc(
+				pageNumbers,
+				func(i int, j int) int {
+					if slices.Contains(beforeRules[i], j) {
+						return -1
+					} else if slices.Contains(beforeRules[j], i) {
+						return 1
+					} else {
+						return 0
+					}
+				},
+			)
+			total += getMiddleValue(pageNumbers)
+		}
+	}
+	return total
+}
+
+func (Solution) GetExample() []byte {
+	return []byte("47|53\n97|13\n97|61\n97|47\n75|29\n61|13\n75|53\n29|13\n97|29\n53|29\n61|53\n97|53\n61|29\n47|13\n75|47\n97|75\n47|61\n75|61\n47|29\n75|13\n53|13\n\n75,47,61,53,29\n97,61,53,29,13\n75,29,13\n75,97,47,61,53\n61,13,29\n97,13,75,29,47")
+}
+
+func (Solution) ExampleAnswer1() int {
+	return 143
+}
+func (Solution) ExampleAnswer2() int {
+	return 123
+}
 
 func inOrder(pageNumbers []int, beforeRules map[int][]int) bool {
 	seen := utils.NewSet[int]()
@@ -57,46 +104,4 @@ func parseInput(input []byte) (rules map[int][]int, updates [][]int) {
 		updateList[j] = pageNumbers
 	}
 	return beforeRules, updateList
-}
-
-func part1(input []byte) int {
-	rules, updates := parseInput(input)
-	total := 0
-	for _, pageNumbers := range updates {
-		if inOrder(pageNumbers, rules) {
-			total += getMiddleValue(pageNumbers)
-		}
-	}
-	return total
-}
-
-func part2(input []byte) int {
-	beforeRules, updates := parseInput(input)
-	total := 0
-	for _, pageNumbers := range updates {
-		if !inOrder(pageNumbers, beforeRules) {
-			slices.SortFunc(
-				pageNumbers,
-				func(i int, j int) int {
-					if slices.Contains(beforeRules[i], j) {
-						return -1
-					} else if slices.Contains(beforeRules[j], i) {
-						return 1
-					} else {
-						return 0
-					}
-				},
-			)
-			total += getMiddleValue(pageNumbers)
-		}
-	}
-	return total
-}
-
-func Part1() int {
-	return part1(utils.ReadInput(DAY, 1))
-}
-
-func Part2() int {
-	return part2(utils.ReadInput(DAY, 1))
 }

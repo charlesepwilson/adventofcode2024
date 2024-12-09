@@ -1,12 +1,34 @@
 package day04
 
 import (
-	"advent_of_code_2024/utils"
 	"bytes"
 	"sort"
 )
 
-const DAY = 4
+type Solution struct{}
+
+func (Solution) Day() int { return 4 }
+
+func (Solution) Part1(input []byte) int {
+	lines := bytes.Split(input, []byte("\n"))
+	return countXmas(lines)
+}
+
+func (Solution) Part2(input []byte) int {
+	lines := bytes.Split(input, []byte("\n"))
+	return countXshapedMas(lines)
+}
+
+func (Solution) GetExample() []byte {
+	return []byte("MMMSXXMASM\nMSAMXMSMSA\nAMXSXMAAMM\nMSAMASMSMX\nXMASAMXAMM\nXXAMMXXAMA\nSMSMSASXSS\nSAXAMASAAA\nMAMMMXMMMM\nMXMXAXMASX")
+}
+
+func (Solution) ExampleAnswer1() int {
+	return 18
+}
+func (Solution) ExampleAnswer2() int {
+	return 9
+}
 
 func isMatch(input [][]byte, startRow int, startCol int, right int, down int, match []byte) bool {
 	for i, letter := range match {
@@ -38,12 +60,6 @@ func countXmas(lines [][]byte) int {
 		}
 	}
 	return total
-}
-
-func Part1() int {
-	input := utils.ReadInput(DAY, 1)
-	lines := bytes.Split(input, []byte("\n"))
-	return countXmas(lines)
 }
 
 func sliceIsMas(slice []byte) bool {
@@ -84,10 +100,4 @@ func countXshapedMas(lines [][]byte) int {
 
 	}
 	return total
-}
-
-func Part2() int {
-	input := utils.ReadInput(DAY, 1)
-	lines := bytes.Split(input, []byte("\n"))
-	return countXshapedMas(lines)
 }

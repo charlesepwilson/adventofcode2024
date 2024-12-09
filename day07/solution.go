@@ -6,7 +6,32 @@ import (
 	"strconv"
 )
 
-const DAY = 7
+type Solution struct{}
+
+func (Solution) Day() int { return 7 }
+
+func (Solution) Part1(input []byte) int {
+	equations := parseInput(input)
+	functionOptions := []BinaryIntFunc{Add, Mul}
+	return sumViableEquations(equations, functionOptions)
+}
+
+func (Solution) Part2(input []byte) int {
+	equations := parseInput(input)
+	functionOptions := []BinaryIntFunc{Add, Mul, Concat}
+	return sumViableEquations(equations, functionOptions)
+}
+
+func (Solution) GetExample() []byte {
+	return []byte("190: 10 19\n3267: 81 40 27\n83: 17 5\n156: 15 6\n7290: 6 8 6 15\n161011: 16 10 13\n192: 17 8 14\n21037: 9 7 18 13\n292: 11 6 16 20")
+}
+
+func (Solution) ExampleAnswer1() int {
+	return 3749
+}
+func (Solution) ExampleAnswer2() int {
+	return 11387
+}
 
 type Equation struct {
 	answer    int
@@ -127,24 +152,4 @@ func sumViableEquations(equations []Equation, functionOptions []BinaryIntFunc) i
 		}
 	}
 	return total
-}
-
-func part1(input []byte) int {
-	equations := parseInput(input)
-	functionOptions := []BinaryIntFunc{Add, Mul}
-	return sumViableEquations(equations, functionOptions)
-}
-
-func part2(input []byte) int {
-	equations := parseInput(input)
-	functionOptions := []BinaryIntFunc{Add, Mul, Concat}
-	return sumViableEquations(equations, functionOptions)
-}
-
-func Part1() int {
-	return part1(utils.ReadInput(DAY, 1))
-}
-
-func Part2() int {
-	return part2(utils.ReadInput(DAY, 1))
 }

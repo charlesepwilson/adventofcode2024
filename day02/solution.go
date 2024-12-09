@@ -1,10 +1,47 @@
 package day02
 
-import (
-	"advent_of_code_2024/utils"
-)
+import "advent_of_code_2024/utils"
 
-const DAY = 2
+type Solution struct{}
+
+func (Solution) Day() int { return 2 }
+
+func (Solution) Part1(input []byte) int {
+	integerLines := utils.GetIntegerTokenLines(input)
+	numSafe := 0
+	for _, line := range integerLines {
+		if lineIsSafe(line) {
+			numSafe += 1
+		}
+	}
+	return numSafe
+}
+
+func (Solution) Part2(input []byte) int {
+	integerLines := utils.GetIntegerTokenLines(input)
+	numSafe := 0
+	for _, line := range integerLines {
+		if dampenedLineIsSafe(line) {
+			numSafe += 1
+		}
+	}
+	return numSafe
+}
+
+func (Solution) GetExample() []byte {
+	return []byte("7 6 4 2 1\n1 2 7 8 9\n9 7 6 2 1\n1 3 2 4 5\n8 6 4 4 1\n1 3 6 7 9")
+}
+
+func (Solution) ExampleAnswer1() int {
+	return 2
+}
+func (Solution) ExampleAnswer2() int {
+	return 4
+}
+
+func dampenedLineIsSafe(line []int) bool {
+	return eLineIsSafe(line, 1)
+}
 
 const MaxDiff = 3
 
@@ -56,30 +93,4 @@ func eLineIsSafe(line []int, maxErrors int) bool {
 
 func lineIsSafe(line []int) bool {
 	return eLineIsSafe(line, 0)
-}
-
-func Part1() int {
-	integerLines := utils.GetIntegerTokenLines(DAY, 1)
-	numSafe := 0
-	for _, line := range integerLines {
-		if lineIsSafe(line) {
-			numSafe += 1
-		}
-	}
-	return numSafe
-}
-
-func dampenedLineIsSafe(line []int) bool {
-	return eLineIsSafe(line, 1)
-}
-
-func Part2() int {
-	integerLines := utils.GetIntegerTokenLines(DAY, 1)
-	numSafe := 0
-	for _, line := range integerLines {
-		if dampenedLineIsSafe(line) {
-			numSafe += 1
-		}
-	}
-	return numSafe
 }

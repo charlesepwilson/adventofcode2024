@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"testing"
 )
 
 func ReadInput(day int, part int) []byte {
@@ -16,8 +17,7 @@ func ReadInput(day int, part int) []byte {
 	panic("Could not read file: " + fileName)
 }
 
-func GetTokenLines(day int, part int) [][][]byte {
-	input := ReadInput(day, part)
+func GetTokenLines(input []byte) [][][]byte {
 	lines := bytes.Split(input, []byte("\n"))
 	tokenLines := make([][][]byte, len(lines))
 
@@ -27,8 +27,8 @@ func GetTokenLines(day int, part int) [][][]byte {
 	return tokenLines
 }
 
-func GetIntegerTokenLines(day int, part int) [][]int {
-	tokenLines := GetTokenLines(day, part)
+func GetIntegerTokenLines(input []byte) [][]int {
+	tokenLines := GetTokenLines(input)
 	integerLines := make([][]int, len(tokenLines))
 	for i, line := range tokenLines {
 		integerLines[i] = make([]int, len(line))
@@ -37,4 +37,51 @@ func GetIntegerTokenLines(day int, part int) [][]int {
 		}
 	}
 	return integerLines
+}
+
+type DaySolution interface {
+	Part1(input []byte) int
+	Part2(input []byte) int
+	Day() int
+	GetExample() []byte
+	ExampleAnswer1() int
+	ExampleAnswer2() int
+}
+
+const fmtString = "day %02d part %d: %d"
+
+func Part1(day DaySolution) int {
+	input := ReadInput(day.Day(), 1)
+	return day.Part1(input)
+}
+func Part2(day DaySolution) int {
+	input := ReadInput(day.Day(), 2)
+	return day.Part2(input)
+}
+
+func PrintPart1(day DaySolution) {
+	fmt.Printf(fmtString, day.Day(), 1, Part1(day))
+}
+func PrintPart2(day DaySolution) {
+	fmt.Printf(fmtString, day.Day(), 2, Part2(day))
+}
+func Print(day DaySolution) {
+	PrintPart1(day)
+	PrintPart2(day)
+}
+
+func TestPart1(day DaySolution, t *testing.T) {
+	exampleInput := day.GetExample()
+	result := day.Part1(exampleInput)
+	if result != day.ExampleAnswer1() {
+		t.Errorf("Wrong answer for day %d p1: %d", day.Day(), result)
+	}
+}
+
+func TestPart2(day DaySolution, t *testing.T) {
+	exampleInput := day.GetExample()
+	result := day.Part2(exampleInput)
+	if result != day.ExampleAnswer2() {
+		t.Errorf("Wrong answer for day %d p2: %d", day.Day(), result)
+	}
 }

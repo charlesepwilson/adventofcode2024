@@ -1,15 +1,15 @@
 package day03
 
 import (
-	"advent_of_code_2024/utils"
 	"regexp"
 	"strconv"
 )
 
-const DAY = 3
+type Solution struct{}
 
-func Part1() int {
-	input := utils.ReadInput(DAY, 1)
+func (Solution) Day() int { return 3 }
+
+func (Solution) Part1(input []byte) int {
 	re := regexp.MustCompile(`mul\((\d+),(\d+)\)`)
 
 	result := 0
@@ -19,6 +19,21 @@ func Part1() int {
 		result += left * right
 	}
 	return result
+}
+
+func (Solution) Part2(input []byte) int {
+	return totalWithDoDont(input)
+}
+
+func (Solution) GetExample() []byte {
+	return []byte("xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))")
+}
+
+func (Solution) ExampleAnswer1() int {
+	return 161
+}
+func (Solution) ExampleAnswer2() int {
+	return 48
 }
 
 func totalWithDoDont(text []byte) int {
@@ -40,9 +55,4 @@ func totalWithDoDont(text []byte) int {
 
 	}
 	return result
-}
-
-func Part2() int {
-	input := utils.ReadInput(DAY, 1)
-	return totalWithDoDont(input)
 }
