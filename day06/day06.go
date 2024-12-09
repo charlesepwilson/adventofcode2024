@@ -10,10 +10,6 @@ import (
 
 const DAY = 6
 
-type VectorI struct {
-	down, right int
-}
-
 // if we make a turn against an obstacle h0 at (r0, c0) while moving up
 // then the state s0 at the turn point is (r0+1, c0, U)
 // and there must be an obstacle h1 at (r0+1, c1), where c1 > c0
@@ -25,43 +21,31 @@ type VectorI struct {
 // since every turn goes 90 degrees we know that the size of the loop must be a multiple of 4
 // we know that every obstacle in the loop (r, c) must have a previous obstacle that's offset by one row/column and a next obstcle also offset by one row or column
 
-func (v VectorI) turnRight() VectorI {
-	return VectorI{v.right, -v.down}
-}
-
-func (v VectorI) Add(other VectorI) VectorI {
-	return VectorI{v.down + other.down, v.right + other.right}
-}
-
-func (v VectorI) Mul(val int) VectorI {
-	return VectorI{v.down * val, v.right * val}
-}
-
-func parseInput(input []byte) (start VectorI, obstacles []VectorI, gridSize VectorI) {
+func parseInput(input []byte) (start utils.VectorI, obstacles []utils.VectorI, gridSize utils.VectorI) {
 	lines := bytes.Split(input, []byte("\n"))
-	gridSize.down = len(lines)
-	gridSize.right = len(lines[0])
+	gridSize.Down = len(lines)
+	gridSize.Right = len(lines[0])
 	for row, line := range lines {
 		for col, char := range line {
 			if char == '#' {
-				obstacles = append(obstacles, VectorI{row, col})
+				obstacles = append(obstacles, utils.VectorI{row, col})
 			} else if char == '^' {
-				start.down = row
-				start.right = col
+				start.Down = row
+				start.Right = col
 			}
 		}
 	}
 	return start, obstacles, gridSize
 }
 
-func getPathPositions(position VectorI, obstacles []VectorI, gridSize VectorI) utils.Set[VectorI] {
-	facing := VectorI{down: -1, right: 0}
-	pathPositions := utils.NewSet[VectorI]()
-	for position.down >= 0 && position.right < gridSize.right && position.right >= 0 && position.down < gridSize.down {
+func getPathPositions(position utils.VectorI, obstacles []utils.VectorI, gridSize utils.VectorI) utils.Set[utils.VectorI] {
+	facing := utils.VectorI{Down: -1, Right: 0}
+	pathPositions := utils.NewSet[utils.VectorI]()
+	for position.Down >= 0 && position.Right < gridSize.Right && position.Right >= 0 && position.Down < gridSize.Down {
 		pathPositions.Add(position)
 		nextPos := position.Add(facing)
 		if slices.Contains(obstacles, nextPos) {
-			facing = facing.turnRight()
+			facing = facing.TurnRight()
 		}
 		nextPos = position.Add(facing)
 		position = nextPos
@@ -76,11 +60,11 @@ func part1(input []byte) int {
 }
 
 type State struct {
-	position, facing VectorI
+	position, facing utils.VectorI
 }
 
 func (s State) Valid() bool {
-	return s.position.down >= 0 && s.position.right >= 0
+	return s.position.Down >= 0 && s.position.Right >= 0
 }
 
 func findNextPos(state State, rowObstacles [][]int, colObstacles [][]int) (nextState State) {
@@ -88,17 +72,17 @@ func findNextPos(state State, rowObstacles [][]int, colObstacles [][]int) (nextS
 	var alignment int
 	var displacement int
 	var fVal int
-	sideways := state.facing.down == 0
+	sideways := state.facing.Down == 0
 	if sideways {
 		relevantObstacles = rowObstacles
-		alignment = state.position.down
-		displacement = state.position.right
-		fVal = state.facing.right
+		alignment = state.position.Down
+		displacement = state.position.Right
+		fVal = state.facing.Right
 	} else {
 		relevantObstacles = colObstacles
-		alignment = state.position.right
-		displacement = state.position.down
-		fVal = state.facing.down
+		alignment = state.position.Right
+		displacement = state.position.Down
+		fVal = state.facing.Down
 	}
 	alignedObstacles := relevantObstacles[alignment]
 	backwards := fVal < 0
@@ -113,19 +97,19 @@ func findNextPos(state State, rowObstacles [][]int, colObstacles [][]int) (nextS
 		if diff == backwards {
 			next := obstaclePos - fVal
 			if sideways {
-				nextState.position.right = next
-				nextState.position.down = alignment
+				nextState.position.Right = next
+				nextState.position.Down = alignment
 			} else {
-				nextState.position.right = alignment
-				nextState.position.down = next
+				nextState.position.Right = alignment
+				nextState.position.Down = next
 			}
-			nextState.facing = state.facing.turnRight()
+			nextState.facing = state.facing.TurnRight()
 			//fmt.Println("state", state, "goes to state", nextState)
 			return nextState
 
 		}
 	}
-	return State{VectorI{-1, -1}, state.facing}
+	return State{utils.VectorI{-1, -1}, state.facing}
 }
 
 func isLoop(state State, rowObstacles [][]int, colObstacles [][]int) bool {
@@ -161,12 +145,12 @@ func makeSliceCopy(slice [][]int) [][]int {
 
 func part2(input []byte) int {
 	startPos, obstacles, gridSize := parseInput(input)
-	facing := VectorI{down: -1, right: 0}
-	rowObstacles := make([][]int, gridSize.down)
-	colObstacles := make([][]int, gridSize.right)
+	facing := utils.VectorI{Down: -1, Right: 0}
+	rowObstacles := make([][]int, gridSize.Down)
+	colObstacles := make([][]int, gridSize.Right)
 	for _, obstacle := range obstacles {
-		rowObstacles[obstacle.down] = append(rowObstacles[obstacle.down], obstacle.right)
-		colObstacles[obstacle.right] = append(colObstacles[obstacle.right], obstacle.down)
+		rowObstacles[obstacle.Down] = append(rowObstacles[obstacle.Down], obstacle.Right)
+		colObstacles[obstacle.Right] = append(colObstacles[obstacle.Right], obstacle.Down)
 	}
 	for _, oblist := range rowObstacles {
 		sort.Ints(oblist)
@@ -179,7 +163,7 @@ func part2(input []byte) int {
 	fmt.Println(obstacles)
 	fmt.Println(rowObstacles)
 	fmt.Println(colObstacles)
-	loopMakers := make([]VectorI, 0)
+	loopMakers := make([]utils.VectorI, 0)
 	pathPositions := getPathPositions(startPos, obstacles, gridSize)
 	for trialObstacle := range pathPositions.Iterate() {
 		if trialObstacle == startPos {
@@ -187,10 +171,10 @@ func part2(input []byte) int {
 		}
 		trialRowObstacles := makeSliceCopy(rowObstacles)
 		trialColObstacles := makeSliceCopy(colObstacles)
-		trialRowObstacles[trialObstacle.down] = append(trialRowObstacles[trialObstacle.down], trialObstacle.right)
-		sort.Ints(trialRowObstacles[trialObstacle.down])
-		trialColObstacles[trialObstacle.right] = append(trialColObstacles[trialObstacle.right], trialObstacle.down)
-		sort.Ints(trialColObstacles[trialObstacle.right])
+		trialRowObstacles[trialObstacle.Down] = append(trialRowObstacles[trialObstacle.Down], trialObstacle.Right)
+		sort.Ints(trialRowObstacles[trialObstacle.Down])
+		trialColObstacles[trialObstacle.Right] = append(trialColObstacles[trialObstacle.Right], trialObstacle.Down)
+		sort.Ints(trialColObstacles[trialObstacle.Right])
 		if isLoop(startState, trialRowObstacles, trialColObstacles) {
 			total += 1
 			loopMakers = append(loopMakers, trialObstacle)

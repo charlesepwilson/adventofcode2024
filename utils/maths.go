@@ -24,3 +24,19 @@ func Pow(base int, exp int) int {
 	}
 	return result
 }
+
+type VectorI struct {
+	Down, Right int
+}
+
+func (v VectorI) Add(other VectorI) VectorI {
+	return VectorI{v.Down + other.Down, v.Right + other.Right}
+}
+
+func (v VectorI) Mul(val int) VectorI {
+	return VectorI{v.Down * val, v.Right * val}
+}
+
+func (v VectorI) TurnRight() VectorI {
+	return VectorI{v.Right, -v.Down}
+}
