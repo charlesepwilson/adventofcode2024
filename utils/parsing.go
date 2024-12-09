@@ -48,14 +48,14 @@ type DaySolution interface {
 	ExampleAnswer2() int
 }
 
-const fmtString = "day %02d part %d: %d"
+const fmtString = "day %02d part %d: %d\n"
 
 func Part1(day DaySolution) int {
 	input := ReadInput(day.Day(), 1)
 	return day.Part1(input)
 }
 func Part2(day DaySolution) int {
-	input := ReadInput(day.Day(), 2)
+	input := ReadInput(day.Day(), 1)
 	return day.Part2(input)
 }
 

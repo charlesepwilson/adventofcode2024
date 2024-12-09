@@ -8,6 +8,7 @@ import (
 	"advent_of_code_2024/day05"
 	"advent_of_code_2024/day06"
 	"advent_of_code_2024/day07"
+	"advent_of_code_2024/day08"
 	"advent_of_code_2024/utils"
 	"slices"
 )
@@ -24,6 +25,7 @@ func main() {
 		day05.Solution{},
 		day06.Solution{},
 		day07.Solution{},
+		day08.Solution{},
 	} {
 		if slices.Contains(solveDays, solution.Day()) {
 			utils.Print(solution)
