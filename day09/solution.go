@@ -1,7 +1,6 @@
 package day09
 
 import (
-	"fmt"
 	"strconv"
 )
 
@@ -16,7 +15,6 @@ func (Solution) Part1(input []byte) int {
 }
 
 func (Solution) Part2(input []byte) int {
-	fmt.Println(len(input))
 	ints := toIntegerList(input)
 	blocks := toBlocks(ints)
 	return computeChecksum2(blocks)
@@ -73,7 +71,6 @@ func stealValue(blocks []Block) (int, []Block) {
 		size:    lastBlock.size - 1,
 		padding: lastBlock.padding,
 	}
-	//fmt.Println(lastBlock.id, blocks)
 	return lastBlock.id, blocks
 }
 
@@ -82,7 +79,6 @@ func computeChecksum(blocks []Block) int {
 	i := 0
 	modifiedBlocks := make([]Block, len(blocks))
 	copy(modifiedBlocks, blocks)
-	//fmt.Println(modifiedBlocks)
 	totalSize := 0
 	for _, block := range blocks {
 		totalSize += block.size
@@ -91,14 +87,12 @@ func computeChecksum(blocks []Block) int {
 		block := modifiedBlocks[blockIndex]
 		for j := 0; j < block.size && i < totalSize; j++ {
 			result += block.id * i
-			//fmt.Println(i, block.id, result)
 			i++
 		}
 		for j := 0; j < block.padding && i < totalSize; j++ {
 			stolenValue, b := stealValue(modifiedBlocks)
 			modifiedBlocks = b
 			result += stolenValue * i
-			//fmt.Println(i, stolenValue, result)
 			i++
 		}
 	}
@@ -114,7 +108,7 @@ func totalLength(blocks []Block) int {
 	return result
 }
 
-func defragIteration(blocks []Block, targetId int, smallestFailure int) ([]Block, int) {
+func defragIteration(blocks []Block, targetId int, smallestFailure int) ([]Block, int, int) {
 	targetIndex := -1
 	for i := len(blocks) - 1; i >= 0; i-- {
 		if blocks[i].id == targetId {
@@ -123,13 +117,10 @@ func defragIteration(blocks []Block, targetId int, smallestFailure int) ([]Block
 		}
 	}
 	if blocks[targetIndex].size >= smallestFailure {
-		fmt.Println("skipping check for", targetId, "as size is", blocks[targetIndex].size, "and already had a failure of size", smallestFailure)
-		return blocks, smallestFailure
+		return blocks, smallestFailure, targetIndex
 	}
-	for j := 0; j < (targetIndex - 1); j++ {
+	for j := 0; j < targetIndex; j++ {
 		if blocks[j].padding >= blocks[targetIndex].size {
-			fmt.Println("Moving id", targetId, "with size", blocks[targetIndex].size, "from index", targetIndex, "to padding of index", j, "with id", blocks[j].id, "and padding", blocks[j].padding)
-			//fmt.Println(targetId, j, targetIndex)
 			newBlocks := make([]Block, 0, len(blocks))
 			newBlocks = append(newBlocks, blocks[:j]...)
 			acceptorBlock := blocks[j]
@@ -143,89 +134,55 @@ func defragIteration(blocks []Block, targetId int, smallestFailure int) ([]Block
 					padding: 0,
 				},
 			)
-			newBlocks = append(
-				newBlocks,
-				Block{
-					id:      targetBlock.id,
-					size:    targetBlock.size,
-					padding: acceptorBlock.padding - targetBlock.size,
-				},
-			)
-			newBlocks = append(newBlocks, blocks[j+1:targetIndex-1]...)
-			newBlocks = append(
-				newBlocks,
-				Block{
-					id:      preTargetBlock.id,
-					size:    preTargetBlock.size,
-					padding: preTargetBlock.padding + targetBlock.padding + targetBlock.size,
-				},
-			)
+			if (targetIndex - j) > 1 {
+				newBlocks = append(
+					newBlocks,
+					Block{
+						id:      targetBlock.id,
+						size:    targetBlock.size,
+						padding: acceptorBlock.padding - targetBlock.size,
+					},
+				)
+				newBlocks = append(newBlocks, blocks[j+1:targetIndex-1]...)
+				newBlocks = append(
+					newBlocks,
+					Block{
+						id:      preTargetBlock.id,
+						size:    preTargetBlock.size,
+						padding: preTargetBlock.padding + targetBlock.padding + targetBlock.size,
+					},
+				)
+			} else {
+				newBlocks = append(
+					newBlocks,
+					Block{
+						id:      targetBlock.id,
+						size:    targetBlock.size,
+						padding: targetBlock.padding + acceptorBlock.padding,
+					},
+				)
+			}
 			newBlocks = append(newBlocks, blocks[targetIndex+1:]...)
-			if len(newBlocks) != len(blocks) {
-				fmtStr := fmt.Sprintf("%d should be %d", len(newBlocks), len(blocks))
-				panic(fmtStr)
-			}
-			totOld := totalLength(blocks)
-			totNew := totalLength(newBlocks)
-			if totOld != totNew {
-				fmtStr := fmt.Sprintf("%d should be %d", totNew, totOld)
-				panic(fmtStr)
-			}
-			return newBlocks, smallestFailure
+			return newBlocks, smallestFailure, j + 1
 		}
 	}
-	fmt.Println("couldn't find place for block", targetId, "with size", blocks[targetIndex].size)
 	if blocks[targetIndex].size < smallestFailure {
 		smallestFailure = blocks[targetIndex].size
 	}
-	return blocks, smallestFailure
-}
-
-func toString(blocks []Block) string {
-	result := make([]byte, 0)
-	for _, block := range blocks {
-		for j := 0; j < block.size; j++ {
-			b := []byte(strconv.Itoa(block.id))
-			if len(b) == 1 {
-				result = append(result, b[0])
-			} else {
-				result = append(result, '(')
-				result = append(result, b...)
-				result = append(result, ')')
-			}
-		}
-		for j := 0; j < block.padding; j++ {
-			result = append(result, '.')
-		}
-	}
-	return string(result)
-}
-
-func printBlocks(blocks []Block) {
-	//fmt.Println(toString(blocks))
+	return blocks, smallestFailure, targetIndex
 }
 
 func computeChecksum2(blocks []Block) int {
-	fmt.Println(len(blocks))
-	smallestFailure := 10
-	for b := len(blocks) - 1; b >= 0 && smallestFailure > 1; b-- {
-		printBlocks(blocks)
-		blocks, smallestFailure = defragIteration(blocks, b, smallestFailure)
+	smallestFailure := 10 // maximum block size is 9 since single characters are used to define block sizes
+	total := 0
+	var newIndex int
+	for id := len(blocks) - 1; id >= 0; id-- {
+		blocks, smallestFailure, newIndex = defragIteration(blocks, id, smallestFailure)
+		leadUp := totalLength(blocks[:newIndex])
+		// once a block has been placed, it will never actually move its position (in the expanded representation)
+		// so we can immediately compute its contribution to the checksum
+		justPlacedBlock := blocks[newIndex]
+		total += id * ((justPlacedBlock.size * leadUp) + (justPlacedBlock.size-1)*justPlacedBlock.size/2)
 	}
-	printBlocks(blocks)
-	result := 0
-	i := 0
-	for _, block := range blocks {
-		for j := 0; j < block.size; j++ {
-			result += block.id * i
-			i++
-		}
-		for j := 0; j < block.padding; j++ {
-			i++
-		}
-	}
-	// 6357408289030 too high
-	// 6353648838485 too high
-	// 6353625164652 too low
-	return result
+	return total
 }
