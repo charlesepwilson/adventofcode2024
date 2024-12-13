@@ -39,6 +39,18 @@ func GetIntegerTokenLines(input []byte) [][]int {
 	return integerLines
 }
 
+func GetIntegerGrid(input []byte) [][]int {
+	lines := bytes.Split(input, []byte("\n"))
+	grid := make([][]int, len(lines))
+	for i, line := range lines {
+		grid[i] = make([]int, len(line))
+		for j, v := range line {
+			grid[i][j], _ = strconv.Atoi(string(v))
+		}
+	}
+	return grid
+}
+
 type DaySolution interface {
 	Part1(input []byte) int
 	Part2(input []byte) int

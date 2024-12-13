@@ -65,3 +65,33 @@ func (v VectorI) Simplify() VectorI {
 	gcd := Gcd(Abs(v.Right), Abs(v.Down))
 	return VectorI{Down: v.Down / gcd, Right: v.Right / gcd}
 }
+
+func (v VectorI) GetDiagAdjacents() []VectorI {
+	adjacents := make([]VectorI, 0, 8)
+	for i := -1; i <= 1; i++ {
+		for j := -1; j <= 1; j++ {
+			if i == 0 && j == 0 {
+				continue
+			}
+			adjacents = append(adjacents, v.Add(VectorI{i, j}))
+		}
+	}
+	return adjacents
+}
+
+func (v VectorI) GetCardinalAdjacents() []VectorI {
+	adjacents := make([]VectorI, 0, 4)
+	for _, delta := range [4]VectorI{
+		{1, 0},
+		{-1, 0},
+		{0, 1},
+		{0, -1},
+	} {
+		adjacents = append(adjacents, v.Add(delta))
+	}
+	return adjacents
+}
+
+func WithinGrid(location VectorI, gridSize VectorI) bool {
+	return location.Right >= 0 && location.Down >= 0 && location.Right < gridSize.Right && location.Down < gridSize.Down
+}

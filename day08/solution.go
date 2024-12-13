@@ -44,10 +44,6 @@ func parseInput(input []byte) (antennae map[byte][]utils.VectorI, gridSize utils
 	return antennae, gridSize
 }
 
-func withinGrid(location utils.VectorI, gridSize utils.VectorI) bool {
-	return location.Right >= 0 && location.Down >= 0 && location.Right < gridSize.Right && location.Down < gridSize.Down
-}
-
 func getPairs(locations []utils.VectorI) [][]utils.VectorI {
 	n := len(locations)
 	numPairs := n * (n - 1) / 2
@@ -75,7 +71,7 @@ func part1NodeFinder(pair []utils.VectorI, gridSize utils.VectorI) utils.Set[uti
 	up := pair[0].Add(diff)
 	down := pair[1].Sub(diff)
 	for _, aNode := range []utils.VectorI{up, down} {
-		if withinGrid(aNode, gridSize) {
+		if utils.WithinGrid(aNode, gridSize) {
 			antiNodes.Add(aNode)
 		}
 	}
@@ -87,12 +83,12 @@ func part2NodeFinder(pair []utils.VectorI, gridSize utils.VectorI) utils.Set[uti
 	diff := pair[0].Sub(pair[1])
 	diff = diff.Simplify()
 	aNode := pair[0]
-	for withinGrid(aNode, gridSize) {
+	for utils.WithinGrid(aNode, gridSize) {
 		antiNodes.Add(aNode)
 		aNode = aNode.Add(diff)
 	}
 	aNode = pair[0].Sub(diff)
-	for withinGrid(aNode, gridSize) {
+	for utils.WithinGrid(aNode, gridSize) {
 		antiNodes.Add(aNode)
 		aNode = aNode.Sub(diff)
 	}
