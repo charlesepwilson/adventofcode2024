@@ -19,7 +19,13 @@ func (Solution) Part1(input []byte) int {
 }
 
 func (Solution) Part2(input []byte) int {
-	return len(input)
+	grid := utils.GetIntegerGrid(input)
+	trails := findAllTrails(grid)
+	result := 0
+	for _, path := range trails {
+		result += len(path)
+	}
+	return result
 }
 
 func (Solution) GetExample() []byte {
@@ -30,14 +36,16 @@ func (Solution) ExampleAnswer1() int {
 	return 36
 }
 func (Solution) ExampleAnswer2() int {
-	return 0
+	return 81
 }
 
 const startHeight = 0
 const endHeight = 9
 
-func buildNetwork(grid [][]int) (map[utils.VectorI]utils.Set[utils.VectorI], []utils.VectorI, []utils.VectorI) {
-	network := make(map[utils.VectorI]utils.Set[utils.VectorI])
+type Network map[utils.VectorI]utils.Set[utils.VectorI]
+
+func buildNetwork(grid [][]int) (Network, []utils.VectorI, []utils.VectorI) {
+	network := make(Network)
 	gridSize := utils.VectorI{Down: len(grid), Right: len(grid[0])}
 	trailHeads := make([]utils.VectorI, 0)
 	trailEnds := make([]utils.VectorI, 0)
@@ -63,7 +71,7 @@ func buildNetwork(grid [][]int) (map[utils.VectorI]utils.Set[utils.VectorI], []u
 	return network, trailHeads, trailEnds
 }
 
-func findTrailEnds(trailhead utils.VectorI, network map[utils.VectorI]utils.Set[utils.VectorI]) utils.Set[utils.VectorI] {
+func findTrailEnds(trailhead utils.VectorI, network Network) utils.Set[utils.VectorI] {
 	positions := utils.NewSet[utils.VectorI]()
 	positions.Add(trailhead)
 	for i := 0; i < endHeight; i++ {
@@ -84,6 +92,42 @@ func findAllTrailEnds(grid [][]int) map[utils.VectorI]utils.Set[utils.VectorI] {
 	trails := make(map[utils.VectorI]utils.Set[utils.VectorI])
 	for _, head := range trailheads {
 		trails[head] = findTrailEnds(head, network)
+	}
+	return trails
+}
+
+type Path []utils.VectorI
+
+func extendPath(path Path, network Network) []Path {
+	newPaths := make([]Path, 0)
+	newPositions := network[path[len(path)-1]]
+	for position := range newPositions.Iterate() {
+		newPath := make(Path, len(path))
+		copy(newPath, path)
+		newPath = append(newPath, position)
+		newPaths = append(newPaths, newPath)
+	}
+	return newPaths
+}
+
+func findTrails(trailhead utils.VectorI, network Network) []Path {
+	paths := make([]Path, 0)
+	paths = append(paths, Path{trailhead})
+	for i := 0; i < endHeight; i++ {
+		newPaths := make([]Path, 0)
+		for _, path := range paths {
+			newPaths = append(newPaths, extendPath(path, network)...)
+		}
+		paths = newPaths
+	}
+	return paths
+}
+
+func findAllTrails(grid [][]int) map[utils.VectorI][]Path {
+	network, trailheads, _ := buildNetwork(grid)
+	trails := make(map[utils.VectorI][]Path)
+	for _, head := range trailheads {
+		trails[head] = findTrails(head, network)
 	}
 	return trails
 }
