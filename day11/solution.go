@@ -2,7 +2,6 @@ package day11
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 )
 
@@ -28,7 +27,7 @@ func (Solution) ExampleAnswer1() int {
 	return 55312
 }
 func (Solution) ExampleAnswer2() int {
-	return 0
+	return 65601038650482
 }
 
 type Stone int
@@ -42,11 +41,11 @@ func stoneFromStr(str []byte) Stone {
 	return Stone(i)
 }
 
-func stoneFromInt(i int) Stone {
-	return Stone(i)
-}
-
 var NullStone = Stone(-1)
+
+func (s Stone) IsNull() bool {
+	return s == NullStone
+}
 
 func (s Stone) Blink() (Stone, Stone) {
 	if s == 0 {
@@ -56,12 +55,8 @@ func (s Stone) Blink() (Stone, Stone) {
 		return stoneFromStr(str[:midpoint]),
 			stoneFromStr(str[midpoint:])
 	} else {
-		return stoneFromInt(int(s) * 2024), NullStone
+		return Stone(int(s) * 2024), NullStone
 	}
-}
-
-func (s Stone) String() string {
-	return string(s.Str())
 }
 
 func inputToStones(input []byte) []Stone {
@@ -73,61 +68,38 @@ func inputToStones(input []byte) []Stone {
 	return stones
 }
 
-func blinkStones(stones []Stone) []Stone {
-	newStones := make([]Stone, 0, len(stones))
-	for _, stone := range stones {
-		left, right := stone.Blink()
-		newStones = append(newStones, left)
-		if right != NullStone {
-			newStones = append(newStones, right)
-		}
-	}
-	return newStones
-}
-
 func countAfter(stones []Stone, blinks int) int {
 	total := 0
 	for _, stone := range stones {
-		total += len(blinkStone(stone, blinks))
+		total += countAfterBlinks(stone, blinks)
 	}
 	return total
 }
 
-type BlinkCache map[int][]Stone
+type BlinkCache map[int]int
 
-var bigBlinkCache = make(map[Stone]BlinkCache) // todo try cacheing but just counts rather than lists
+var bigBlinkCache = make(map[Stone]BlinkCache)
 
-func blinkStone(stone Stone, numTimes int) []Stone {
-	fmt.Println(bigBlinkCache)
-	if numTimes == 0 {
-		return []Stone{stone}
+func countAfterBlinks(stone Stone, numBlinks int) (count int) {
+	if numBlinks == 0 {
+		return 1
 	}
-	result := make([]Stone, 0)
 	blinkCache, ok := bigBlinkCache[stone]
 	if !ok {
 		blinkCache = make(BlinkCache)
 		bigBlinkCache[stone] = blinkCache
-	}
-	defer func() { blinkCache[numTimes] = result }()
-	for i := numTimes; i > 0; i-- {
-		afterBlinks, okk := blinkCache[i]
-		if okk {
-			for _, s := range afterBlinks {
-				result = append(result, blinkStone(s, numTimes-i)...)
-			}
-			blinkCache[i] = result
-			return result
+	} else {
+		cachedCount, isCached := blinkCache[numBlinks]
+		if isCached {
+			return cachedCount
 		}
 	}
-	left, right := stone.Blink()
-	blinkCache[1] = []Stone{left}
-	fullLeft := blinkStone(left, numTimes-1)
-	result = append(result, fullLeft...)
+	defer func() { blinkCache[numBlinks] = count }()
 
-	if right != NullStone {
-		blinkCache[1] = append(blinkCache[1], right)
-		fullRight := blinkStone(right, numTimes-1)
-		result = append(result, fullRight...)
+	left, right := stone.Blink()
+	count += countAfterBlinks(left, numBlinks-1)
+	if !right.IsNull() {
+		count += countAfterBlinks(right, numBlinks-1)
 	}
-	return result
+	return count
 }
