@@ -17,7 +17,7 @@ func (Solution) Part2(input []byte) int {
 	return countAntiNodes(input, part2NodeFinder)
 }
 
-func (Solution) GetExample() []byte {
+func (Solution) GetExample(part int) []byte {
 	return []byte("............\n........0...\n.....0......\n.......0....\n....0.......\n......A.....\n............\n............\n........A...\n.........A..\n............\n............")
 }
 

@@ -20,7 +20,7 @@ func (Solution) Part2(input []byte) int {
 	return computeChecksum2(blocks)
 }
 
-func (Solution) GetExample() []byte {
+func (Solution) GetExample(part int) []byte {
 	return []byte("2333133121414131402")
 }
 

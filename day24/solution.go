@@ -12,7 +12,7 @@ func (Solution) Part2(input []byte) int {
 	return len(input)
 }
 
-func (Solution) GetExample() []byte {
+func (Solution) GetExample(part int) []byte {
 	return []byte("")
 }
 

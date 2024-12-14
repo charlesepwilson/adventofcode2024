@@ -28,7 +28,7 @@ func (Solution) Part2(input []byte) int {
 	return result
 }
 
-func (Solution) GetExample() []byte {
+func (Solution) GetExample(part int) []byte {
 	return []byte("89010123\n78121874\n87430965\n96549874\n45678903\n32019012\n01329801\n10456732")
 }
 

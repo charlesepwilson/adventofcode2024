@@ -55,7 +55,7 @@ type DaySolution interface {
 	Part1(input []byte) int
 	Part2(input []byte) int
 	Day() int
-	GetExample() []byte
+	GetExample(part int) []byte
 	ExampleAnswer1() int
 	ExampleAnswer2() int
 }
@@ -83,7 +83,7 @@ func Print(day DaySolution) {
 }
 
 func TestPart1(day DaySolution, t *testing.T) {
-	exampleInput := day.GetExample()
+	exampleInput := day.GetExample(1)
 	result := day.Part1(exampleInput)
 	if result != day.ExampleAnswer1() {
 		t.Errorf("Wrong answer for day %d p1: %d", day.Day(), result)
@@ -91,7 +91,7 @@ func TestPart1(day DaySolution, t *testing.T) {
 }
 
 func TestPart2(day DaySolution, t *testing.T) {
-	exampleInput := day.GetExample()
+	exampleInput := day.GetExample(2)
 	result := day.Part2(exampleInput)
 	if result != day.ExampleAnswer2() {
 		t.Errorf("Wrong answer for day %d p2: %d", day.Day(), result)

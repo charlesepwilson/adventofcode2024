@@ -23,15 +23,19 @@ func (Solution) Part2(input []byte) int {
 	return len(input)
 }
 
-func (Solution) GetExample() []byte {
-	return []byte("RRRRIICCFF\nRRRRIICCCF\nVVRRRCCFFF\nVVRCCCJFFF\nVVVVCJJCFE\nVVIVCCJJEE\nVVIIICJJEE\nMIIIIIJJEE\nMIIISIJEEE\nMMMISSJEEE")
+func (Solution) GetExample(part int) []byte {
+	if part == 1 {
+		return []byte("RRRRIICCFF\nRRRRIICCCF\nVVRRRCCFFF\nVVRCCCJFFF\nVVVVCJJCFE\nVVIVCCJJEE\nVVIIICJJEE\nMIIIIIJJEE\nMIIISIJEEE\nMMMISSJEEE")
+	} else {
+		return []byte("AAAAAA\nAAABBA\nAAABBA\nABBAAA\nABBAAA\nAAAAAA")
+	}
 }
 
 func (Solution) ExampleAnswer1() int {
 	return 1930
 }
 func (Solution) ExampleAnswer2() int {
-	return 0
+	return 368
 }
 
 func plotGrid(input []byte) [][]byte {

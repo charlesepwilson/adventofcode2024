@@ -19,7 +19,7 @@ func (Solution) Part2(input []byte) int {
 	return countAfter(stones, 75)
 }
 
-func (Solution) GetExample() []byte {
+func (Solution) GetExample(part int) []byte {
 	return []byte("125 17")
 }
 
