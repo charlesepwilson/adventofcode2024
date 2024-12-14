@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"fmt"
+	"math"
+)
+
 func Abs[T Integer](x T) T {
 	if x < 0 {
 		return -x
@@ -94,4 +99,11 @@ func (v VectorI) GetCardinalAdjacents() []VectorI {
 
 func WithinGrid(location VectorI, gridSize VectorI) bool {
 	return location.Right >= 0 && location.Down >= 0 && location.Right < gridSize.Right && location.Down < gridSize.Down
+}
+
+func AlmostEqual(a, b float64) bool {
+	epsilon := 0.0001
+	delta := math.Abs(a - b)
+	fmt.Println("delta: ", delta)
+	return delta < epsilon
 }
