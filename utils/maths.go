@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -104,6 +103,5 @@ func WithinGrid(location VectorI, gridSize VectorI) bool {
 func AlmostEqual(a, b float64) bool {
 	epsilon := 0.0001
 	delta := math.Abs(a - b)
-	fmt.Println("delta: ", delta)
 	return delta < epsilon
 }

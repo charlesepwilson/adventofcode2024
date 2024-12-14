@@ -3,7 +3,6 @@ package day13
 import (
 	"advent_of_code_2024/utils"
 	"bytes"
-	"fmt"
 	"math"
 	"strconv"
 )
@@ -14,20 +13,17 @@ func (Solution) Day() int { return 13 }
 
 func (Solution) Part1(input []byte) int {
 	machines := parseInput(input)
-	result := 0
-	for _, machine := range machines {
-		aPresses, bPresses, success := getWinningButtons(machine)
-		if success {
-			result += getCost(aPresses, bPresses)
-		}
-	}
-	// 18166 too low
-	// 27008 too low
-	return result
+	return countTokensForAllWins(machines)
 }
 
 func (Solution) Part2(input []byte) int {
-	return len(input)
+	machines := parseInput(input)
+	valueIncrease := 10000000000000
+	vectorIncrease := utils.VectorI{Down: valueIncrease, Right: valueIncrease}
+	for i := range machines {
+		machines[i].prize = machines[i].prize.Add(vectorIncrease)
+	}
+	return countTokensForAllWins(machines)
 }
 
 func (Solution) GetExample(part int) []byte {
@@ -38,7 +34,7 @@ func (Solution) ExampleAnswer1() int {
 	return 480
 }
 func (Solution) ExampleAnswer2() int {
-	return 0
+	return 875318608908
 }
 
 const costA int = 3
@@ -111,7 +107,6 @@ func isPositiveInteger(f float64) bool {
 }
 
 func getWinningButtons(machine Machine) (aCount, bCount int, success bool) {
-	fmt.Println("machine", machine)
 	if aDir := machine.buttonA.Simplify(); aDir == machine.buttonB.Simplify() {
 		panic("got parallel buttons")
 		return aCount, bCount, false // todo complete this case
@@ -139,14 +134,23 @@ func getWinningButtons(machine Machine) (aCount, bCount int, success bool) {
 	}.Inverse()
 	finalVec := basisChangeMatrix.Multiply(startVec)
 	if !isPositiveInteger(finalVec.x) || !isPositiveInteger(finalVec.y) {
-		fmt.Println("no solution", "aPresses", finalVec.x, "b presses", finalVec.y)
 		return aCount, bCount, false
 	}
-	fmt.Println("aPresses", finalVec.x, "b presses", finalVec.y)
 
 	return int(math.Round(finalVec.x)), int(math.Round(finalVec.y)), true
 }
 
 func getCost(aPresses int, bPresses int) int {
 	return aPresses*costA + bPresses*costB
+}
+
+func countTokensForAllWins(machines []Machine) int {
+	result := 0
+	for _, machine := range machines {
+		aPresses, bPresses, success := getWinningButtons(machine)
+		if success {
+			result += getCost(aPresses, bPresses)
+		}
+	}
+	return result
 }
