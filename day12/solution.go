@@ -20,22 +20,26 @@ func (Solution) Part1(input []byte) int {
 }
 
 func (Solution) Part2(input []byte) int {
-	return len(input)
+	plots := plotGrid(input)
+	regions := findRegions(plots)
+	price := 0
+	for _, region := range regions {
+		area := getArea(region)
+		lines := getStraightLines(region)
+		price += area * lines
+	}
+	return price
 }
 
 func (Solution) GetExample(part int) []byte {
-	if part == 1 {
-		return []byte("RRRRIICCFF\nRRRRIICCCF\nVVRRRCCFFF\nVVRCCCJFFF\nVVVVCJJCFE\nVVIVCCJJEE\nVVIIICJJEE\nMIIIIIJJEE\nMIIISIJEEE\nMMMISSJEEE")
-	} else {
-		return []byte("AAAAAA\nAAABBA\nAAABBA\nABBAAA\nABBAAA\nAAAAAA")
-	}
+	return []byte("RRRRIICCFF\nRRRRIICCCF\nVVRRRCCFFF\nVVRCCCJFFF\nVVVVCJJCFE\nVVIVCCJJEE\nVVIIICJJEE\nMIIIIIJJEE\nMIIISIJEEE\nMMMISSJEEE")
 }
 
 func (Solution) ExampleAnswer1() int {
 	return 1930
 }
 func (Solution) ExampleAnswer2() int {
-	return 368
+	return 1206
 }
 
 func plotGrid(input []byte) [][]byte {
@@ -51,7 +55,6 @@ func findRegions(grid [][]byte) []utils.Set[utils.VectorI] {
 			v := utils.VectorI{Down: i, Right: j}
 			if !seen.Contains(v) {
 				newRegion := utils.NewSet[utils.VectorI]()
-				utils.ToggleablePrint("Building region of", string([]byte{plot}), "starting at", v)
 				newRegion.Add(v)
 				seen.Add(v)
 				regionSize := 0
@@ -60,15 +63,12 @@ func findRegions(grid [][]byte) []utils.Set[utils.VectorI] {
 					for p := range newRegion.Iterate() {
 						for _, adj := range p.GetCardinalAdjacents() {
 							if utils.WithinGrid(adj, gridSize) && grid[adj.Down][adj.Right] == plot {
-								utils.ToggleablePrint("Adding to region", adj)
 								newRegion.Add(adj)
 								seen.Add(adj)
 							}
 						}
 					}
-					utils.ToggleablePrint("Region Size updated from", regionSize, " to", newRegion.Len())
 				}
-				utils.ToggleablePrint("region", string([]byte{plot}), newRegion)
 				regions = append(regions, newRegion)
 			}
 		}
@@ -91,4 +91,44 @@ func getPerimeter(region utils.Set[utils.VectorI]) int {
 		}
 	}
 	return perimeter
+}
+
+func isAdjacent(v1 utils.VectorI, v2 utils.VectorI) bool {
+	dDown := utils.Abs(v1.Down - v2.Down)
+	dRight := utils.Abs(v1.Right - v2.Right)
+	return (dDown == 1 && dRight == 0) || (dRight == 1 && dDown == 0)
+}
+
+func getStraightLines(region utils.Set[utils.VectorI]) int {
+	externalCorners := utils.NewSet[utils.VectorI]()
+	internalCorners := utils.NewSet[utils.VectorI]()
+	doubleCorners := utils.NewSet[utils.VectorI]()
+	for plot := range region.Iterate() {
+		for i := 0; i < 2; i++ {
+			for j := 0; j < 2; j++ {
+				boxCenter := utils.VectorI{Down: plot.Down + i, Right: plot.Right + j}
+				box := make([]utils.VectorI, 0, 4)
+				for bi := -1; bi < 1; bi++ {
+					for bj := -1; bj < 1; bj++ {
+						boxElem := utils.VectorI{
+							Down:  plot.Down + i + bi,
+							Right: plot.Right + j + bj,
+						}
+						if region.Contains(boxElem) {
+							box = append(box, boxElem)
+						}
+					}
+				}
+				if len(box) == 3 {
+					internalCorners.Add(boxCenter)
+				} else if len(box) == 2 && !isAdjacent(box[0], box[1]) {
+					doubleCorners.Add(boxCenter)
+				} else if len(box) == 1 {
+					externalCorners.Add(boxCenter)
+				}
+			}
+		}
+	}
+	totalCorners := internalCorners.Len() + externalCorners.Len() + (2 * doubleCorners.Len())
+	return totalCorners
 }

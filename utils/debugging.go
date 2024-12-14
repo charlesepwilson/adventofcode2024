@@ -3,7 +3,7 @@ package utils
 import "fmt"
 
 func ToggleablePrint(a ...any) {
-	if false {
+	if true {
 		fmt.Println(a...)
 	}
 }
