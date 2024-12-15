@@ -3,6 +3,7 @@ package day14
 import (
 	"advent_of_code_2024/utils"
 	"bytes"
+	"fmt"
 	"strconv"
 )
 
@@ -23,8 +24,21 @@ func (Solution) Part1(input []byte) int {
 	return result
 }
 
+var iteration = 0
+
 func (Solution) Part2(input []byte) int {
-	return len(input)
+	robots := parseInput(input)
+	advRate := 1
+	for {
+		for i := range robots {
+			robots[i] = robots[i].Advance(advRate)
+		}
+		iteration += advRate
+		if looksChristmassy(robots) {
+			return iteration
+		}
+	}
+
 }
 
 func (Solution) GetExample(part int) []byte {
@@ -103,4 +117,55 @@ func countRobotsPerQuadrant(robots []Robot) [4]int {
 		}
 	}
 	return counts
+}
+
+func next(b byte) byte {
+	if b == ' ' {
+		return '#'
+	} else if b == '#' {
+		return '*'
+	} else {
+		return '+'
+	}
+}
+
+func printRobots(robots []Robot) {
+	fmt.Println("Iteration", iteration)
+	grid := make([][]byte, gridSize.Down)
+	for i := range grid {
+		grid[i] = make([]byte, gridSize.Right)
+		for j := range grid[i] {
+			grid[i][j] = ' '
+		}
+	}
+
+	for _, robot := range robots {
+		grid[robot.position.Down][robot.position.Right] = next(grid[robot.position.Down][robot.position.Right])
+	}
+	for _, line := range grid {
+		fmt.Println(string(line))
+	}
+}
+
+func looksChristmassy(robots []Robot) bool {
+	var horizontalMidpoint = gridSize.Right / 2
+	gradient := 2
+	numInTriangle := 0
+	for _, robot := range robots {
+		var h int
+		if robot.position.Right < horizontalMidpoint {
+			h = robot.position.Right
+		} else {
+			h = gridSize.Right - robot.position.Right
+		}
+		if robot.position.Down > gridSize.Down-(gradient*h) {
+			numInTriangle++
+		}
+	}
+	if (1000*numInTriangle)/len(robots) > 750 {
+		printRobots(robots)
+		return true
+	} else {
+		return false
+	}
 }
