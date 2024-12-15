@@ -105,3 +105,11 @@ func AlmostEqual(a, b float64) bool {
 	delta := math.Abs(a - b)
 	return delta < epsilon
 }
+
+func EuclideanMod(a, b int) int {
+	m := a % b
+	if m < 0 {
+		m += b
+	}
+	return m
+}
