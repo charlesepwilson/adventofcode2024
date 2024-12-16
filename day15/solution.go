@@ -3,7 +3,6 @@ package day15
 import (
 	"advent_of_code_2024/utils"
 	"bytes"
-	"strings"
 )
 
 type Solution struct{}
@@ -44,11 +43,10 @@ func (Solution) ExampleAnswer2() int {
 const ROBOT = '@'
 const BOX = 'O'
 const WALL = '#'
-const OUTSIDE = ';'
 const LEFTBOX = '['
 const RIGHTBOX = ']'
 
-func parseInput(input []byte) (grid Grid, instructions []utils.VectorI, start utils.VectorI) {
+func parseInput(input []byte) (grid utils.Grid, instructions []utils.VectorI, start utils.VectorI) {
 	gridPart, instructionsPart, _ := bytes.Cut(input, []byte("\n\n"))
 
 	grid = bytes.Split(gridPart, []byte("\n"))
@@ -77,39 +75,7 @@ func parseInput(input []byte) (grid Grid, instructions []utils.VectorI, start ut
 	return grid, instructions, start
 }
 
-type Grid [][]byte
-
-func (g *Grid) Get(v utils.VectorI) byte {
-	if !utils.WithinGrid(v, g.Size()) {
-		return OUTSIDE
-	}
-	return (*g)[v.Down][v.Right]
-}
-
-func (g *Grid) Set(v utils.VectorI, c byte) {
-	if !utils.WithinGrid(v, g.Size()) {
-		return
-	}
-	(*g)[v.Down][v.Right] = c
-}
-
-func (g *Grid) Size() utils.VectorI {
-	return utils.VectorI{
-		Down:  len(*g),
-		Right: len((*g)[0]),
-	}
-}
-
-func (g *Grid) String() string {
-	builder := strings.Builder{}
-	for _, row := range *g {
-		builder.WriteString(string(row))
-		builder.WriteString("\n")
-	}
-	return builder.String()
-}
-
-func followInstruction(robotPos utils.VectorI, grid Grid, instruction utils.VectorI) (newRobotPos utils.VectorI, newGrid Grid) {
+func followInstruction(robotPos utils.VectorI, grid utils.Grid, instruction utils.VectorI) (newRobotPos utils.VectorI, newGrid utils.Grid) {
 	newRobotPos = robotPos.Add(instruction)
 	itemAtNewRobotPos := grid.Get(newRobotPos)
 	if itemAtNewRobotPos == WALL {
@@ -134,8 +100,8 @@ func followInstruction(robotPos utils.VectorI, grid Grid, instruction utils.Vect
 	}
 }
 
-func widenGrid(grid Grid) Grid {
-	newGrid := make(Grid, len(grid))
+func widenGrid(grid utils.Grid) utils.Grid {
+	newGrid := make(utils.Grid, len(grid))
 	for i, row := range grid {
 		newRow := make([]byte, 0, len(row)*2)
 		for _, char := range row {
@@ -152,7 +118,7 @@ func widenGrid(grid Grid) Grid {
 	return newGrid
 }
 
-func followWideInstruction(robotPos utils.VectorI, grid Grid, instruction utils.VectorI) (newRobotPos utils.VectorI, newGrid Grid) {
+func followWideInstruction(robotPos utils.VectorI, grid utils.Grid, instruction utils.VectorI) (newRobotPos utils.VectorI, newGrid utils.Grid) {
 	newRobotPos = robotPos.Add(instruction)
 	itemAtNewRobotPos := grid.Get(newRobotPos)
 	if itemAtNewRobotPos == WALL {
@@ -172,7 +138,7 @@ func followWideInstruction(robotPos utils.VectorI, grid Grid, instruction utils.
 	}
 }
 
-func canPush(pushObjAt utils.VectorI, grid Grid, instruction utils.VectorI) bool {
+func canPush(pushObjAt utils.VectorI, grid utils.Grid, instruction utils.VectorI) bool {
 	obj := grid.Get(pushObjAt)
 	if obj == WALL {
 		return false
@@ -198,7 +164,7 @@ func canPush(pushObjAt utils.VectorI, grid Grid, instruction utils.VectorI) bool
 	}
 }
 
-func applyPush(pushObjAt utils.VectorI, grid Grid, instruction utils.VectorI) {
+func applyPush(pushObjAt utils.VectorI, grid utils.Grid, instruction utils.VectorI) {
 	obj := grid.Get(pushObjAt)
 	if obj == LEFTBOX || obj == RIGHTBOX {
 		pushInto := pushObjAt.Add(instruction)
@@ -222,7 +188,7 @@ func applyPush(pushObjAt utils.VectorI, grid Grid, instruction utils.VectorI) {
 	}
 }
 
-func computeTotalGps(grid Grid, target byte) int {
+func computeTotalGps(grid utils.Grid, target byte) int {
 	result := 0
 	for i, line := range grid {
 		for j, item := range line {

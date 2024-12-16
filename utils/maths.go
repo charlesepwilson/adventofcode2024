@@ -96,10 +96,6 @@ func (v VectorI) GetCardinalAdjacents() []VectorI {
 	return adjacents
 }
 
-func WithinGrid(location VectorI, gridSize VectorI) bool {
-	return location.Right >= 0 && location.Down >= 0 && location.Right < gridSize.Right && location.Down < gridSize.Down
-}
-
 func AlmostEqual(a, b float64) bool {
 	epsilon := 0.0001
 	delta := math.Abs(a - b)
@@ -112,4 +108,11 @@ func EuclideanMod(a, b int) int {
 		m += b
 	}
 	return m
+}
+
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

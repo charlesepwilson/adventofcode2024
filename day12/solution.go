@@ -62,7 +62,7 @@ func findRegions(grid [][]byte) []utils.Set[utils.VectorI] {
 					regionSize = newRegion.Len()
 					for p := range newRegion.Iterate() {
 						for _, adj := range p.GetCardinalAdjacents() {
-							if utils.WithinGrid(adj, gridSize) && grid[adj.Down][adj.Right] == plot {
+							if utils.WithinGridSize(adj, gridSize) && grid[adj.Down][adj.Right] == plot {
 								newRegion.Add(adj)
 								seen.Add(adj)
 							}

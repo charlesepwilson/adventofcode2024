@@ -58,7 +58,7 @@ func buildNetwork(grid [][]int) (Network, []utils.VectorI, []utils.VectorI) {
 				trailEnds = append(trailEnds, position)
 			}
 			for _, adjacent := range position.GetCardinalAdjacents() {
-				if utils.WithinGrid(adjacent, gridSize) && (grid[adjacent.Down][adjacent.Right]-v) == 1 {
+				if utils.WithinGridSize(adjacent, gridSize) && (grid[adjacent.Down][adjacent.Right]-v) == 1 {
 					_, ok := network[position]
 					if !ok {
 						network[position] = utils.NewSet[utils.VectorI]()

@@ -71,7 +71,7 @@ func part1NodeFinder(pair []utils.VectorI, gridSize utils.VectorI) utils.Set[uti
 	up := pair[0].Add(diff)
 	down := pair[1].Sub(diff)
 	for _, aNode := range []utils.VectorI{up, down} {
-		if utils.WithinGrid(aNode, gridSize) {
+		if utils.WithinGridSize(aNode, gridSize) {
 			antiNodes.Add(aNode)
 		}
 	}
@@ -83,12 +83,12 @@ func part2NodeFinder(pair []utils.VectorI, gridSize utils.VectorI) utils.Set[uti
 	diff := pair[0].Sub(pair[1])
 	diff = diff.Simplify()
 	aNode := pair[0]
-	for utils.WithinGrid(aNode, gridSize) {
+	for utils.WithinGridSize(aNode, gridSize) {
 		antiNodes.Add(aNode)
 		aNode = aNode.Add(diff)
 	}
 	aNode = pair[0].Sub(diff)
-	for utils.WithinGrid(aNode, gridSize) {
+	for utils.WithinGridSize(aNode, gridSize) {
 		antiNodes.Add(aNode)
 		aNode = aNode.Sub(diff)
 	}

@@ -16,13 +16,14 @@ import (
 	"advent_of_code_2024/day13"
 	"advent_of_code_2024/day14"
 	"advent_of_code_2024/day15"
+	"advent_of_code_2024/day16"
 	"advent_of_code_2024/utils"
 	"slices"
 )
 
 func main() {
 	solveDays := []int{
-		15,
+		16,
 	}
 	for _, solution := range []utils.DaySolution{
 		day01.Solution{},
@@ -40,6 +41,7 @@ func main() {
 		day13.Solution{},
 		day14.Solution{},
 		day15.Solution{},
+		day16.Solution{},
 	} {
 		if slices.Contains(solveDays, solution.Day()) {
 			utils.Print(solution)
