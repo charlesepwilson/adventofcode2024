@@ -16,7 +16,7 @@ func TestPart2(t *testing.T) {
 }
 
 func TestIsLoop(t *testing.T) {
-	position, obstacles, gridSize := parseInput(Solution{}.GetExample())
+	position, obstacles, gridSize := parseInput(Solution{}.GetExample(1))
 	facing := utils.VectorI{Down: -1, Right: 0}
 	rowObstacles := make([][]int, gridSize.Down)
 	colObstacles := make([][]int, gridSize.Right)
