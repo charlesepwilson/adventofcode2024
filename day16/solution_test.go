@@ -25,3 +25,12 @@ func TestPart1Ex2(t *testing.T) {
 		t.Errorf("Wrong answer for day %d p1: %d", day.Day(), result)
 	}
 }
+
+func TestPart2Ex2(t *testing.T) {
+	day := Solution{}
+	exampleInput := GetExample2()
+	result := day.Part2(exampleInput)
+	if result != 45 {
+		t.Errorf("Wrong answer for day %d p2: %d", day.Day(), result)
+	}
+}
