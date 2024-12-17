@@ -3,7 +3,6 @@ package day16
 import (
 	"advent_of_code_2024/utils"
 	"bytes"
-	"math"
 )
 
 type Solution struct{}
@@ -12,10 +11,14 @@ func (Solution) Day() int { return 16 }
 
 func (Solution) Part1(input []byte) int {
 	start, end, grid := parseInput(input)
-	return dijkstra(start, end, grid)
+	_, minDist := dijkstra(start, end, grid)
+	return minDist
 }
 
 func (Solution) Part2(input []byte) int {
+	//start, end, grid := parseInput(input)
+	//distances, minDist := dijkstra(start, end, grid)
+
 	return len(input)
 }
 
@@ -27,7 +30,7 @@ func (Solution) ExampleAnswer1() int {
 	return 7036
 }
 func (Solution) ExampleAnswer2() int {
-	return 0
+	return 45
 }
 
 func parseInput(input []byte) (start Node, end utils.VectorI, grid utils.Grid) {
@@ -56,46 +59,53 @@ const costTurn = 1000
 const costMove = 1
 const WALL = '#'
 
+func canMoveTo(position utils.VectorI, grid utils.Grid) bool {
+	itemAtMovePos := grid.Get(position)
+	return itemAtMovePos != WALL && itemAtMovePos != utils.OUTSIDE
+}
+
 func (n Node) getNeighbours(grid utils.Grid) map[Node]int {
 	neighbours := make(map[Node]int, 3)
-	movePos := n.position.Add(utils.Directions[n.direction])
-	itemAtMovePos := grid.Get(movePos)
-	if itemAtMovePos != WALL && itemAtMovePos != utils.OUTSIDE {
-		neighbours[Node{
-			position:  movePos,
-			direction: n.direction,
-		}] = costMove
+	straight := Node{
+		position:  n.position.Add(utils.Directions[n.direction]),
+		direction: n.direction,
+	}
+	if canMoveTo(straight.position, grid) {
+		neighbours[straight] = costMove
 	}
 	numDirs := len(utils.Directions)
-	neighbours[Node{
+	right := Node{
 		position:  n.position,
 		direction: (n.direction + 1) % numDirs,
-	}] = costTurn
-	neighbours[Node{
+	}
+	neighbours[right] = costTurn
+	left := Node{
 		position:  n.position,
 		direction: (n.direction + numDirs - 1) % numDirs,
-	}] = costTurn
+	}
+	neighbours[left] = costTurn
+
 	return neighbours
 }
 
-func closestUnvisited(distances map[Node]int, visited utils.Set[Node]) Node {
-	minDistance := math.MaxInt
-	node := Node{}
-	for n, d := range distances {
-		if visited.Contains(n) {
-			continue
-		}
-		if d < minDistance {
-			minDistance = d
-			node = n
+func closestUnvisited(nodeHeap *utils.Heap[NodeWithDistance], visited utils.Set[Node]) Node {
+	for {
+		next := nodeHeap.Pop()
+		if !visited.Contains(next.node) {
+			return next.node
 		}
 	}
-	return node
 }
 
-func dijkstra(start Node, end utils.VectorI, grid utils.Grid) int {
+type NodeWithDistance struct {
+	node Node
+	dist int
+}
+
+func dijkstra(start Node, end utils.VectorI, grid utils.Grid) (map[Node]int, int) {
 	visited := utils.NewSet[Node]()
 	distances := make(map[Node]int)
+	unvisited := utils.NewHeap[NodeWithDistance](func(a, b NodeWithDistance) bool { return a.dist < b.dist })
 	distances[start] = 0
 	currentNode := start
 	endNodes := []Node{
@@ -123,11 +133,14 @@ func dijkstra(start Node, end utils.VectorI, grid utils.Grid) int {
 			bestDistance, ok := distances[n]
 			if !ok || distance < bestDistance {
 				distances[n] = distance
+				unvisited.Push(NodeWithDistance{n, distance})
 			}
 		}
 		visited.Add(currentNode)
-		currentNode = closestUnvisited(distances, visited)
+		grid.Set(currentNode.position, 'o')
+		nextNode := closestUnvisited(unvisited, visited)
+		currentNode = nextNode
 	}
 
-	return utils.Min(distances[endNodes[0]], distances[endNodes[1]])
+	return distances, utils.Min(distances[endNodes[0]], distances[endNodes[1]])
 }
