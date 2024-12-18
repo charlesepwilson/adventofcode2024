@@ -1,6 +1,7 @@
 package day17
 
 import (
+	"advent_of_code_2024/utils"
 	"bytes"
 	"fmt"
 	"strconv"
@@ -214,34 +215,40 @@ func computeOutput(a int) int {
 	return combined % 8
 }
 
+func checkAnswer(chunks []int, target int) bool {
+	a := 0
+	for i, chunk := range chunks {
+		a += chunk << (3 * (len(chunks) - i - 1))
+	}
+	output := computeOutput(a)
+	return output == target
+}
+
 // 2,4,1,2,7,5,1,3,4,3,5,5,0,3,3,0
 func cheatPart2(program []int) int {
 	//program := []int{2,4,1,2,7,5,1,3,4,3,5,5,0,3,3,0}
-	//chunks := make([][]int, len(program))
+	chunkOptions := make([]utils.Set[int], len(program))
+	// todo chunking is  bad idea, just keep a running list of leading value candidates
+	for i := range chunkOptions {
+		chunkOptions[i] = utils.NewSet[int]()
+	}
 	answer := 0
 	for i := len(program) - 1; i >= 0; i-- {
-		a := answer
-		if a == 0 {
-			a = 1
-		}
-		var output int
-		found := false
-		for a < 8+answer {
-			output = computeOutput(a)
-			fmt.Println("tttt", a, output, program[i])
-			if output == program[i] {
-				found = true
-				break
-			}
-			a++
-		}
-		if !found {
-			panic("failed to construct answer")
-		}
-		fmt.Println("output", output, program[i], "a", a%8, a, strconv.FormatInt(int64(a), 2))
+		target := program[i]
+		for j := i; j < len(program); j++ {
+			// todo loop over every combination of chunks
+			// remove any that don't work anymore
+			optionsForChunkJ := chunkOptions[j]
 
-		//answer += a
-		answer = a << 3 // answer << 3
+			for k := 0; k < 8; k++ {
+				trialChunks := make([]int, len(program))
+				// todo copy in the
+				trialChunks[i] = k
+				if checkAnswer(trialChunks, target) {
+					chunkOptions[i].Add(k)
+				}
+			}
+		}
 	}
 	return answer >> 3
 
