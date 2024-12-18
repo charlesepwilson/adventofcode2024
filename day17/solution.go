@@ -2,6 +2,7 @@ package day17
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -25,20 +26,22 @@ func (Solution) Part1(input []byte) string {
 func (Solution) Part2(input []byte) string {
 	processor := buildProcessor(input)
 	processor.requiresMatching = true
-	i := 0
+	a0 := 1 << 45
+	a0 = 37194903486512
 	//defer func() { fmt.Println(i) }()
 	//fmt.Println(math.MaxInt)
-	for {
+	for a0 < (1 << 48) {
 		processor.outputs = make([]int, 0, len(processor.program))
-		processor.a = i
+		processor.a = a0
 		processor.pointerIndex = 0
 		processor.quit = false
 		finished := processor.process()
 		if finished && sliceEqual(processor.outputs, processor.program) {
-			return strconv.Itoa(i)
+			return strconv.Itoa(a0)
 		}
-		i++
+		a0++
 	}
+	panic("my assumptions were wrong! oh no!")
 }
 
 func (Solution) GetExample(part int) []byte {
@@ -179,3 +182,78 @@ func sliceEqual(a, b []int) bool {
 	}
 	return true
 }
+
+// the input program for this seems to be a little bit cheeky...
+// there's only 1 jump instruction, which is at the end and takes you back to position 0
+// so we're just cycling through the same sequence of instructions
+// similarly, there is only one output instruction,
+// and only one instruction that modifies register A, which is after the output
+// additionally, both B and C get set based only on the value of A each cycle,
+// so each output only depends on the value of A at the start of that cycle
+// the final important thing is that when A is modified, it's just being bit shifted by 3,
+// which is conveniently the same number of bits that we actually care about...
+// so the below solution might be cheating since I'm using that info, but I can't think of a better one
+
+//var answer = []int{2, 4, 1, 2, 7, 5, 1, 3, 4, 3, 5, 5, 0, 3, 3, 0}
+
+// the program is 16 numbers long
+// so we go through exactly 16 cycles
+// a >> (15 * 3) > 0
+// i.e. a >= (1 << 45)
+// and a >> (16 * 3) == 0
+// i.e. a < (1 << 48)
+
+// we know that on the final cycle, the number is 3 bits long (and not 0),
+// and that those 3 bits are the leading bits
+
+func computeOutput(a int) int {
+	final3bits := a % 8
+	modified3bits := final3bits ^ 2
+	shifted := a >> modified3bits
+	combined := modified3bits ^ 3 ^ shifted
+	return combined % 8
+}
+
+// 2,4,1,2,7,5,1,3,4,3,5,5,0,3,3,0
+func cheatPart2(program []int) int {
+	//program := []int{2,4,1,2,7,5,1,3,4,3,5,5,0,3,3,0}
+	//chunks := make([][]int, len(program))
+	answer := 0
+	for i := len(program) - 1; i >= 0; i-- {
+		a := answer
+		if a == 0 {
+			a = 1
+		}
+		var output int
+		found := false
+		for a < 8+answer {
+			output = computeOutput(a)
+			fmt.Println("tttt", a, output, program[i])
+			if output == program[i] {
+				found = true
+				break
+			}
+			a++
+		}
+		if !found {
+			panic("failed to construct answer")
+		}
+		fmt.Println("output", output, program[i], "a", a%8, a, strconv.FormatInt(int64(a), 2))
+
+		//answer += a
+		answer = a << 3 // answer << 3
+	}
+	return answer >> 3
+
+	//leading := 8
+	//a0 := leading
+	////defer func() { fmt.Println(i) }()
+	////fmt.Println(math.MaxInt)
+	//for a0 < 8+leading {
+	//	output := computeOutput(a0)
+	//	fmt.Println(a0, output)
+	//	a0++
+	//}
+}
+
+// answer = 001 000
