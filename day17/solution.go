@@ -12,11 +12,7 @@ func (Solution) Day() int { return 17 }
 
 func (Solution) Part1(input []byte) string {
 	processor := buildProcessor(input)
-	done := false
-	for !done {
-		//fmt.Println(processor)
-		done = processor.doInstruction()
-	}
+	processor.process()
 	//fmt.Println(processor)
 	strOutputs := make([]string, len(processor.outputs))
 	for i, output := range processor.outputs {
@@ -27,36 +23,56 @@ func (Solution) Part1(input []byte) string {
 }
 
 func (Solution) Part2(input []byte) string {
-	return ""
+	processor := buildProcessor(input)
+	processor.requiresMatching = true
+	i := 0
+	//defer func() { fmt.Println(i) }()
+	//fmt.Println(math.MaxInt)
+	for {
+		processor.outputs = make([]int, 0, len(processor.program))
+		processor.a = i
+		processor.pointerIndex = 0
+		processor.quit = false
+		finished := processor.process()
+		if finished && sliceEqual(processor.outputs, processor.program) {
+			return strconv.Itoa(i)
+		}
+		i++
+	}
 }
 
 func (Solution) GetExample(part int) []byte {
-	return []byte("Register A: 729\nRegister B: 0\nRegister C: 0\n\nProgram: 0,1,5,4,3,0")
+	if part == 1 {
+		return []byte("Register A: 729\nRegister B: 0\nRegister C: 0\n\nProgram: 0,1,5,4,3,0")
+	} else {
+		return []byte("Register A: 2024\nRegister B: 0\nRegister C: 0\n\nProgram: 0,3,5,4,3,0")
+	}
 }
 
 func (Solution) ExampleAnswer1() string {
 	return "4,6,3,5,6,3,5,2,1,0"
 }
 func (Solution) ExampleAnswer2() string {
-	return ""
+	return "117440"
 }
 
 type Processor struct {
 	program               []int
 	a, b, c, pointerIndex int
 	outputs               []int
+	requiresMatching      bool
+	quit                  bool
 }
 
 func (p *Processor) comboOperand(v int) int {
-	if v == 4 {
+	switch v {
+	case 4:
 		return p.a
-	} else if v == 5 {
+	case 5:
 		return p.b
-	} else if v == 6 {
+	case 6:
 		return p.c
-	} else if v == 7 {
-		panic("invalid operand")
-	} else {
+	default:
 		return v
 	}
 }
@@ -65,11 +81,6 @@ type Instruction func(p *Processor, v int)
 
 func (p *Processor) dv(v int) int {
 	return p.a >> p.comboOperand(v)
-	//denominator := 1 << p.comboOperand(v)
-	//if denominator == 0 {
-	//	return 0
-	//}
-	//return numerator / denominator
 }
 
 var instructions = []Instruction{
@@ -93,6 +104,11 @@ var instructions = []Instruction{
 	},
 	func(p *Processor, v int) { // out
 		value := p.comboOperand(v) % 8
+		if p.requiresMatching && (len(p.program) <= len(p.outputs) || value != p.program[len(p.outputs)]) {
+			//fmt.Println("quitting early", p.program, p.outputs, value)
+			p.quit = true
+			return
+		}
 		p.outputs = append(p.outputs, value)
 	},
 	func(p *Processor, v int) { // bdv
@@ -138,4 +154,28 @@ func buildProcessor(input []byte) Processor {
 		pointerIndex: 0,
 	}
 	return processor
+}
+
+func (p *Processor) process() bool {
+	done := false
+	for !done {
+		//fmt.Println(processor)
+		done = p.doInstruction()
+		if p.quit {
+			return false
+		}
+	}
+	return true
+}
+
+func sliceEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
