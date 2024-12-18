@@ -51,38 +51,38 @@ func GetIntegerGrid(input []byte) [][]int {
 	return grid
 }
 
-type DaySolution interface {
-	Part1(input []byte) int
-	Part2(input []byte) int
+type DaySolution[Answer comparable] interface {
+	Part1(input []byte) Answer
+	Part2(input []byte) Answer
 	Day() int
 	GetExample(part int) []byte
-	ExampleAnswer1() int
-	ExampleAnswer2() int
+	ExampleAnswer1() Answer
+	ExampleAnswer2() Answer
 }
 
 const fmtString = "day %02d part %d: %d\n"
 
-func Part1(day DaySolution) int {
+func Part1[Answer comparable](day DaySolution[Answer]) Answer {
 	input := ReadInput(day.Day(), 1)
 	return day.Part1(input)
 }
-func Part2(day DaySolution) int {
+func Part2[Answer comparable](day DaySolution[Answer]) Answer {
 	input := ReadInput(day.Day(), 1)
 	return day.Part2(input)
 }
 
-func PrintPart1(day DaySolution) {
+func PrintPart1[Answer comparable](day DaySolution[Answer]) {
 	fmt.Printf(fmtString, day.Day(), 1, Part1(day))
 }
-func PrintPart2(day DaySolution) {
+func PrintPart2[Answer comparable](day DaySolution[Answer]) {
 	fmt.Printf(fmtString, day.Day(), 2, Part2(day))
 }
-func Print(day DaySolution) {
+func Print[Answer comparable](day DaySolution[Answer]) {
 	PrintPart1(day)
 	PrintPart2(day)
 }
 
-func TestPart1(day DaySolution, t *testing.T) {
+func TestPart1[Answer comparable](day DaySolution[Answer], t *testing.T) {
 	exampleInput := day.GetExample(1)
 	result := day.Part1(exampleInput)
 	if result != day.ExampleAnswer1() {
@@ -90,7 +90,7 @@ func TestPart1(day DaySolution, t *testing.T) {
 	}
 }
 
-func TestPart2(day DaySolution, t *testing.T) {
+func TestPart2[Answer comparable](day DaySolution[Answer], t *testing.T) {
 	exampleInput := day.GetExample(2)
 	result := day.Part2(exampleInput)
 	if result != day.ExampleAnswer2() {
