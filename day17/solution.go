@@ -2,6 +2,7 @@ package day17
 
 import (
 	"bytes"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -24,21 +25,8 @@ func (Solution) Part1(input []byte) string {
 
 func (Solution) Part2(input []byte) string {
 	processor := buildProcessor(input)
-	processor.requiresMatching = true
-	i := 0
-	//defer func() { fmt.Println(i) }()
-	//fmt.Println(math.MaxInt)
-	for {
-		processor.outputs = make([]int, 0, len(processor.program))
-		processor.a = i
-		processor.pointerIndex = 0
-		processor.quit = false
-		finished := processor.process()
-		if finished && sliceEqual(processor.outputs, processor.program) {
-			return strconv.Itoa(i)
-		}
-		i++
-	}
+	answer := cheatPart2(&processor)
+	return strconv.Itoa(answer)
 }
 
 func (Solution) GetExample(part int) []byte {
@@ -159,7 +147,6 @@ func buildProcessor(input []byte) Processor {
 func (p *Processor) process() bool {
 	done := false
 	for !done {
-		//fmt.Println(processor)
 		done = p.doInstruction()
 		if p.quit {
 			return false
@@ -168,14 +155,55 @@ func (p *Processor) process() bool {
 	return true
 }
 
-func sliceEqual(a, b []int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
+func (p *Processor) reset(a0 int) {
+	p.outputs = make([]int, 0, len(p.program))
+	p.a = a0
+	p.pointerIndex = 0
+	p.quit = false
+}
+
+func (p *Processor) processFrom(a0 int) {
+	p.reset(a0)
+	p.process()
+}
+
+// the input program for this seems to be a little bit cheeky...
+// there's only 1 jump instruction, which is at the end and takes you back to position 0
+// so we're just cycling through the same sequence of instructions
+// similarly, there is only one output instruction,
+// and only one instruction that modifies register A, which is after the output
+// additionally, both B and C get set based only on the value of A each cycle,
+// so each output only depends on the value of A at the start of that cycle
+// the final important thing is that when A is modified, it's just being bit shifted by 3,
+// which is conveniently the same number of bits that we actually care about...
+// so the below solution might be cheating since I'm using that info, but I can't think of a better one
+
+func getFirstOutput(p *Processor, a0 int) int {
+	p.processFrom(a0)
+	return p.outputs[0]
+}
+
+func cheatPart2(p *Processor) int {
+	validLeadings := make([]int, 1)
+	for i := len(p.program) - 1; i >= 0; i-- {
+		newValidLeadings := make([]int, 0)
+		target := p.program[i]
+		for _, validLeading := range validLeadings {
+			vL := validLeading << 3
+			for k := 0; k < 8; k++ {
+				newA := vL + k
+				if getFirstOutput(p, newA) == target {
+					newValidLeadings = append(newValidLeadings, newA)
+				}
+
+			}
 		}
+		validLeadings = newValidLeadings
 	}
-	return true
+	answer := slices.Min(validLeadings)
+	p.processFrom(answer)
+	if !slices.Equal(p.outputs, p.program) {
+		panic("Program failed")
+	}
+	return answer
 }
