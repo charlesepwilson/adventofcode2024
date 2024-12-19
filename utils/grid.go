@@ -51,3 +51,11 @@ var Directions = [4]VectorI{
 	{Down: 1},
 	{Right: -1},
 }
+
+func MakeGrid(size VectorI) Grid {
+	grid := make(Grid, size.Down)
+	for i := range grid {
+		grid[i] = make([]byte, size.Right)
+	}
+	return grid
+}

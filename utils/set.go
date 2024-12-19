@@ -44,3 +44,11 @@ func (s Set[T]) String() string {
 	builder.WriteString("}")
 	return builder.String()
 }
+
+func SetFromSlice[T comparable](slice []T) Set[T] {
+	s := NewSet[T]()
+	for _, v := range slice {
+		s.Add(v)
+	}
+	return s
+}
